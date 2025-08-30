@@ -1,0 +1,103 @@
+Heh, sure—let’s put numbers on “HEADLINE SCREAMING.” Here’s a compact, punchy framework you can actually use.
+
+# Clickbait Index (CBI): 0–100
+
+Higher = more clickbait. Score = (weighted sum of “bait” signals) − (weighted sum of “antidotes”), normalized and clipped to 0–100.
+
+## A) “Bait” signals (add points)
+
+1. **Hype / Hyperbole words** (e.g., shocking, insane, bombshell, destroys, obliterates, meltdown)
+   Weight: **+12** · Measure: count per 10 words (cap at 3).
+
+2. **Doom / Threat framing** (collapse, crisis, catastrophic, end of…)
+   Weight: **+8** · Count per 10 words (cap at 2).
+
+3. **Ad hominem / value judgments** (sickly, vile, loser, traitor, pedo, groomer)
+   Weight: **+8** · Count per 10 words (cap at 2).
+
+4. **Curiosity gap / withheld subject** (“This changes everything”, “You won’t believe…”, “What happened next…”)
+   Weight: **+10** · Binary (0/1) plus +1 if vague pronouns (this/these/they) replace the concrete noun.
+
+5. **Question-headline** (“Is X dead?”, “Did Y just…?”)
+   Weight: **+6** · Binary (0/1).
+
+6. **ALL CAPS / shouting** (≥1 token fully caps *not* an acronym)
+   Weight: **+6** · % of tokens in ALL CAPS (cap at 10%).
+
+7. **Punctuational drama** (!!!, ??, ?!, multiple emojis)
+   Weight: **+6** · Count of “dramatic marks” (cap at 3).
+
+8. **Listicle / numbered promise** (“Top 7…”, “5 reasons…”)
+   Weight: **+4** · Binary (0/1).
+
+9. **Temporal urgency** (now, today, this morning, breaking)
+   Weight: **+4** · Count (cap at 2).
+
+10. **CTA baked into headline** (must see, watch, subscribe, click, buy)
+    Weight: **+6** · Count (cap at 2).
+
+11. **Culture-war bait** (woke, deep state, communist, globalist, Soros, pedo ring, etc.)
+    Weight: **+6** · Count (cap at 2).
+
+12. **Body/appearance bait** (frail, sickly, obese, “looks unwell”)
+    Weight: **+3** · Binary (0/1).
+
+## B) “Antidotes” (subtract points)
+
+13. **Concrete sourcing** (names reputable outlet, doc, docket no., case title)
+    Example: “WSJ / Reuters / Case 24-1234”
+    Weight: **−8** · Binary (0/1) per *distinct* concrete source (cap at 2).
+
+14. **Verifiable specifics** (dates, dollar figures with units, statute names: “Aug 30, 2025”, “\$1.5–1.8B”, “IEEPA/Section 232”)
+    Weight: **−6** · Count (cap at 2).
+
+15. **Neutral verbs** (says, reports, files, issues, announces) instead of “slams/destroys/exposes”
+    Weight: **−3** · Binary (0/1).
+
+16. **Cautionary qualifiers** (allegedly, reportedly, according to)
+    Weight: **−3** · Count (cap at 2).
+    (Yeah, they can be weasel words—but they *do* signal restraint.)
+
+17. **Non-sensational topic terms** (panel, memorandum, ruling, budget estimate, transcript)
+    Weight: **−3** · Count (cap at 2).
+
+## Scoring bands
+
+* **0–20**: Straight newsy.
+* **21–40**: Mild heat.
+* **41–60**: Clicky.
+* **61–80**: Spicy clickbait.
+* **81–100**: Caps-lock carnival.
+
+## Quick examples (how it would score)
+
+* “Appeals court narrows Trump tariff authority in Aug. 30 ruling”
+
+  * Antidotes (date, legal term) → **\~10–20**.
+* “BREAKING: Shocking court SMACKDOWN destroys Trump’s illegal tariffs!!!”
+
+  * Hype, caps, breaking, drama, ad hom → **\~80–90**.
+* “Is Trump secretly planning ‘rebate checks’? Here’s what the emails say”
+
+  * Question + curiosity + sourcing → **\~45–55**.
+
+## Implementation notes (if you want to automate later)
+
+* Tokenize → lowercase → count matches against small lexicons:
+
+  * `HYPE = {shocking, bombshell, insane, obliterate, destroy, meltdown, explosive, devastating, brutal, savage, humiliating}`
+  * `DOOM = {crisis, collapse, catastrophe, doomed, dying, apocalyptic}`
+  * `CULTURE = {woke, deep state, globalist, communist, groomer, pedo, marxist}`
+  * `CTA = {must see, watch, subscribe, click, buy, join}`
+  * `URGENCY = {breaking, now, today, this morning}`
+  * “Concrete source” regex for `(WSJ|Reuters|AP|NYT|court|Case\\s?\\d{2,}-\\d+)`, dates, money `\\$\\d+(\\.\\d+)?(B|M|K)?`.
+* Normalize counts per 10 words; clamp caps/punct ratios.
+* `CBI = clamp(0, 100 * (Σ w_bait·f_bait − Σ w_anti·f_anti) / MAX_POSSIBLE)`
+
+## How we’ll use it in your tracker
+
+* Add 3 columns per clip: **`headline`**, **`CBI`**, **`why`** (top 3 features that drove the score).
+* We can keep the long-form reliability notes separate from the headline CBI so you see: “accurate content, but the headline screams like a Red Bull can.”
+
+If you want, I can wire up a tiny script that takes a CSV of headlines and spits back a CBI with the top contributing features.
+

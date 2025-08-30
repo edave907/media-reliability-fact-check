@@ -1,0 +1,60 @@
+Absolutely—great signal to add. Let’s bolt on a **Headline → Topic Delay** component and wire it into the Clickbait Index.
+
+# New CBI component: Headline→Topic Delay (HTD)
+
+## What it measures
+
+How long into the video you must watch before the **headline’s topic is first addressed** and then **meaningfully explained**.
+
+* **T₁ (First mention):** first on-screen/verbal reference that clearly matches the headline topic/claim.
+* **T₂ (First substantive explanation):** first point with *meat*—evidence, definition, numbers, sources, quotes, or a concrete claim beyond vibes.
+* **L:** total video length (seconds).
+* **r₁ = T₁/L**, **r₂ = T₂/L** (fractions of total runtime).
+
+## Scoring (adds to CBI; bigger = more clickbaity)
+
+**Delay score = HTD =**
+
+* If **never explained** (no T₂): **+25** (also flag as “headline not supported”).
+* Else use **r₂** (explanation delay) with bands:
+
+  * **≤ 10%** of runtime or **≤ 30s** → **−10** (anti-clickbait credit)
+  * **10–25%** → **0**
+  * **25–50%** → **+8**
+  * **> 50%** → **+15**
+
+*(We key on T₂ because “actually tells you something” is what people clicked for. T₁ is useful for diagnostics; see the report block below.)*
+
+## Bonus micro-signals (optional, small weights)
+
+* **Teaser loops** (“after this…” repeated ≥2 before T₂): **+2** (cap +4)
+* **Off-topic cold open** (>60s unrelated before T₁): **+3**
+
+## How we’ll show it in your write-ups
+
+In the **Clickbaitiness (CBI)** section I’ll add a mini block:
+
+* **Topic first mentioned:** `mm:ss` (**r₁**%)
+* **First substantive explanation:** `mm:ss` (**r₂**%)
+* **HTD contribution to CBI:** `±N`
+* **Notes:** (e.g., teaser loops, off-topic cold open)
+
+## No timestamps? Two options
+
+* **With timestamps** (preferred): I’ll parse T₁/T₂ directly from the transcript/video.
+* **No timestamps:** I’ll estimate using transcript word positions with **\~160 words/min** (or your preferred WPM) to approximate T₁/T₂. It’s a decent proxy.
+
+## Integration into the overall CBI
+
+* Keep the existing “bait” and “antidote” signals.
+* Add **HTD** as another term. Max added by HTD = **+15** (or **+25** if never explained); max credit = **−10** for very early explanation.
+
+---
+
+If you want, I can also add these fields to your tracker schema for later aggregation:
+
+* `video_length_sec`, `topic_first_mention_sec (T1)`, `topic_first_explained_sec (T2)`, `delay_ratio (r2)`, `htd_score`.
+
+Say the word and I’ll update the tracker layout; otherwise I’ll just include HTD in every future summary.
+
+
